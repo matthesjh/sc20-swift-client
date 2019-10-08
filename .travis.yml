@@ -1,0 +1,24 @@
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      language: generic
+    - os: osx
+      language: swift
+      osx_image: xcode11
+
+script:
+  - chmod u+x scripts/build-package.sh
+  - scripts/build-package.sh
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+branches:
+  only:
+    - master
+
+git:
+  depth: 10
