@@ -1,3 +1,3 @@
-## 1.0.0 (yyyy-mm-dd)
+## x.y.z (yyyy-mm-dd)
 
 * First release
