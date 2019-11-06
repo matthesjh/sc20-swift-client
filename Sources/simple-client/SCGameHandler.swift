@@ -198,7 +198,7 @@ class SCGameHandler: NSObject, XMLParserDelegate {
                 self.roomId = roomId
             case "lastMove":
                 guard let classAttr = attributeDict["class"],
-                      let type = SCMoveType(rawValue: classAttr) else {
+                      let type = SCMoveType(rawValue: classAttr.uppercased()) else {
                     parser.abortParsing()
                     self.exitGame(withError: "The last move could not be parsed!")
                     break
