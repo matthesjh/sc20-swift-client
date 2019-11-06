@@ -1,5 +1,9 @@
 import Foundation
 
+#if os(Linux)
+import FoundationXML
+#endif
+
 /// The game handler is responsible for the communication with the game server
 /// and the selection of the game logic.
 class SCGameHandler: NSObject, XMLParserDelegate {
