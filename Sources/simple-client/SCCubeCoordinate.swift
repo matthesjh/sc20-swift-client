@@ -62,13 +62,39 @@ struct SCCubeCoordinate {
 
     // MARK: - Methods
 
+    /// Returns the cube coordinate on the game board in the given direction
+    /// with the given distance from this cube coordinate.
+    ///
+    /// - Parameters:
+    ///   - direction: The direction on the game board.
+    ///   - distance: The number of steps to be taken.
+    ///
+    /// - Returns: The cube coordinate on the game board in the given direction
+    ///   with the given distance from this cube coordinate.
+    func coordinate(inDirection direction: SCDirection, withDistance distance: Int = 1) -> SCCubeCoordinate {
+        switch direction {
+            case .upRight:
+                return SCCubeCoordinate(x: self.x + distance, y: self.y - distance)
+            case .right:
+                return SCCubeCoordinate(x: self.x + distance, z: self.z - distance)
+            case .downRight:
+                return SCCubeCoordinate(y: self.y + distance, z: self.z - distance)
+            case .downLeft:
+                return SCCubeCoordinate(x: self.x - distance, y: self.y + distance)
+            case .left:
+                return SCCubeCoordinate(x: self.x - distance, z: self.z + distance)
+            case .upLeft:
+                return SCCubeCoordinate(y: self.y - distance, z: self.z + distance)
+        }
+    }
+
     /// Returns the distance to the given cube coordinate.
     ///
-    /// - Parameter coord: The cube coordinate to which the distance should be
-    ///   calculated.
+    /// - Parameter coordinate: The cube coordinate to which the distance should
+    ///   be calculated.
     ///
     /// - Returns: The distance to the given cube coordinate.
-    func distance(toCoordinate coord: SCCubeCoordinate) -> Int {
-        return (abs(self.x - coord.x) + abs(self.y - coord.y) + abs(self.z - coord.z)) / 2
+    func distance(toCoordinate coordinate: SCCubeCoordinate) -> Int {
+        max(abs(self.x - coordinate.x), abs(self.y - coordinate.y), abs(self.z - coordinate.z))
     }
 }
