@@ -1,6 +1,8 @@
 # Swift client for Software-Challenge Germany 2019/2020
 
 [![Build Status](https://travis-ci.com/matthesjh/sc20-swift-client.svg?branch=master)](https://travis-ci.com/matthesjh/sc20-swift-client)
+[![Swift](https://img.shields.io/badge/swift-%3E%3D%205.1-brightgreen.svg?logo=swift)](https://swift.org/)
+![Supported Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20linux-lightgrey.svg)
 
 :warning: The package is currently in an early stage of development and therefore not intended for use. :warning:
 
