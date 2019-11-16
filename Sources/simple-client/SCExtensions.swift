@@ -1,3 +1,22 @@
+extension Array where Element: Equatable {
+    /// Removes the first occurrence of the given element from the collection.
+    ///
+    /// Calling this method may invalidate any existing indices for use with
+    /// this collection.
+    ///
+    /// - Parameter element: The element to remove from the collection.
+    ///
+    /// - Complexity: O(*n*), where *n* is the length of the collection.
+    @inlinable
+    public mutating func removeFirst(of element: Element) {
+        guard let index = self.firstIndex(of: element) else {
+            return
+        }
+
+        self.remove(at: index)
+    }
+}
+
 extension Sequence {
     /// Returns the number of elements in the sequence that satisfy the given
     /// predicate.
