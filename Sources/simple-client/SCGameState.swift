@@ -71,7 +71,7 @@ class SCGameState: CustomStringConvertible {
     ///   - y: The y-coordinate of the field.
     subscript(x: Int, y: Int) -> SCFieldState {
         get {
-            self.board[x + SCConstants.shift][y + SCConstants.shift].state
+            self.getField(x: x, y: y).state
         }
     }
 
@@ -94,7 +94,8 @@ class SCGameState: CustomStringConvertible {
     ///
     /// - Returns: The field with the given x- and y-coordinate.
     func getField(x: Int, y: Int) -> SCField {
-        self.board[x + SCConstants.shift][y + SCConstants.shift]
+        let shiftX = x + SCConstants.shift
+        return self.board[shiftX][y + min(SCConstants.shift, shiftX)]
     }
 
     /// Returns the field with the given cube coordinate.
@@ -132,7 +133,7 @@ class SCGameState: CustomStringConvertible {
     /// - Parameter field: The field to be placed on the game board.
     func setField(field: SCField) {
         let x = field.coordinate.x + SCConstants.shift
-        let y = field.coordinate.y + SCConstants.shift
+        let y = field.coordinate.y + min(SCConstants.shift, x)
         self.board[x][y] = field
     }
 
