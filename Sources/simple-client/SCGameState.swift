@@ -75,6 +75,15 @@ class SCGameState: CustomStringConvertible {
         }
     }
 
+    /// Accesses the field state of the field with the given cube coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    subscript(coordinate: SCCubeCoordinate) -> SCFieldState {
+        get {
+            self[coordinate.x, coordinate.y]
+        }
+    }
+
     // MARK: - Methods
 
     /// Returns the field with the given x- and y-coordinate.
@@ -88,6 +97,15 @@ class SCGameState: CustomStringConvertible {
         self.board[x + SCConstants.shift][y + SCConstants.shift]
     }
 
+    /// Returns the field with the given cube coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The field with the given cube coordinate.
+    func getField(coordinate: SCCubeCoordinate) -> SCField {
+        self.getField(x: coordinate.x, y: coordinate.y)
+    }
+
     /// Returns the field state of the field with the given x- and y-coordinate.
     ///
     /// - Parameters:
@@ -97,6 +115,15 @@ class SCGameState: CustomStringConvertible {
     /// - Returns: The state of the field.
     func getFieldState(x: Int, y: Int) -> SCFieldState {
         self[x, y]
+    }
+
+    /// Returns the field state of the field with the given cube coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The state of the field.
+    func getFieldState(coordinate: SCCubeCoordinate) -> SCFieldState {
+        self[coordinate]
     }
 
     /// Replaces the field that has the same cube coordinate as the given field
