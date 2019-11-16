@@ -158,5 +158,23 @@ class SCGameState: CustomStringConvertible {
 
     // MARK: - CustomStringConvertible
 
-    var description: String { "SCGameState" }
+    var description: String {
+        (-SCConstants.shift...SCConstants.shift).reduce(into: "") { res, z in
+            let lower = max(-SCConstants.shift, -z - SCConstants.shift)
+            let upper = min(SCConstants.shift, -z + SCConstants.shift)
+
+            res += (lower...upper).map {
+                switch self[$0, -$0 - z] {
+                    case .red:
+                        return "R"
+                    case .blue:
+                        return "B"
+                    case .obstructed:
+                        return "X"
+                    case .empty:
+                        return "-"
+                }
+            } + "\n"
+        }
+    }
 }
