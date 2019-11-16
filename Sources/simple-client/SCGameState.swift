@@ -156,6 +156,41 @@ class SCGameState: CustomStringConvertible {
     /// - Returns: `true` if the move could be performed; otherwise, `false`.
     func performMove(move: SCMove) -> Bool { false }
 
+    /// Reverts the last move performed on the game board.
+    func undoLastMove() {
+        if let lastMove = self.lastMove,
+           let oldLastMove = self.undoStack.popLast() {
+            self.lastMove = oldLastMove
+            self.currentPlayer.switchColor()
+            self.turn -= 1
+
+            switch lastMove.type {
+                case .dragMove:
+                    let start = lastMove.start!
+                    let startX = start.x + SCConstants.shift
+                    self.board[startX][start.y + min(SCConstants.shift, startX)].pieces.append(lastMove.piece!)
+
+                    let dest = lastMove.destination!
+                    let destX = dest.x + SCConstants.shift
+                    _ = self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.popLast()
+                case .setMove:
+                    let dest = lastMove.destination!
+                    let destX = dest.x + SCConstants.shift
+                    _ = self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.popLast()
+
+                    let piece = lastMove.piece!.type
+                    switch self.currentPlayer {
+                        case .blue:
+                            self.undeployedBluePieces.append(piece)
+                        case .red:
+                            self.undeployedRedPieces.append(piece)
+                    }
+                default:
+                    break
+            }
+        }
+    }
+
     // MARK: - CustomStringConvertible
 
     var description: String {
