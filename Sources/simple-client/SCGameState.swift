@@ -12,10 +12,14 @@ class SCGameState: CustomStringConvertible {
     private(set) var lastMove: SCMove?
     /// The two-dimensional array of fields representing the game board.
     private(set) var board: [[SCField]]
+    /// The deployed pieces of the blue player.
+    private var deployedBluePieces: [SCPieceType]
     /// The undeployed pieces of the blue player.
-    private(set) var undeployedBluePieces: [SCPieceType]
+    private var undeployedBluePieces: [SCPieceType]
+    /// The deployed pieces of the red player.
+    private var deployedRedPieces: [SCPieceType]
     /// The undeployed pieces of the red player.
-    private(set) var undeployedRedPieces: [SCPieceType]
+    private var undeployedRedPieces: [SCPieceType]
     /// The stack used to revert the last move.
     private var undoStack = [SCMove?]()
 
@@ -41,6 +45,10 @@ class SCGameState: CustomStringConvertible {
             return (lower...upper).map { SCField(x: x, y: $0) }
         }
 
+        // Initialize the deployed pieces of both players.
+        self.deployedBluePieces = []
+        self.deployedRedPieces = []
+
         // Initialize the undeployed pieces of both players.
         let startingPieces = SCConstants.startingPieces.compactMap { SCPieceType(shortDescription: $0) }
         self.undeployedBluePieces = startingPieces
@@ -56,7 +64,9 @@ class SCGameState: CustomStringConvertible {
         self.turn = gameState.turn
         self.lastMove = gameState.lastMove
         self.board = gameState.board
+        self.deployedBluePieces = gameState.deployedBluePieces
         self.undeployedBluePieces = gameState.undeployedBluePieces
+        self.deployedRedPieces = gameState.deployedRedPieces
         self.undeployedRedPieces = gameState.undeployedRedPieces
         self.undoStack = gameState.undoStack
     }
@@ -133,8 +143,7 @@ class SCGameState: CustomStringConvertible {
     /// - Parameter field: The field to be placed on the game board.
     func setField(field: SCField) {
         let x = field.coordinate.x + SCConstants.shift
-        let y = field.coordinate.y + min(SCConstants.shift, x)
-        self.board[x][y] = field
+        self.board[x][field.coordinate.y + min(SCConstants.shift, x)] = field
     }
 
     /// Returns the fields owned by the given player.
@@ -144,6 +153,24 @@ class SCGameState: CustomStringConvertible {
     /// - Returns: The array of fields owned by the given player.
     func getFields(ofPlayer player: SCPlayerColor) -> [SCField] {
         self.board.flatMap { $0.filter { $0.isOwned(byPlayer: player) } }
+    }
+
+    /// Returns the deployed pieces of the given player.
+    ///
+    /// - Parameter player: The color of the player.
+    ///
+    /// - Returns: The array of deployed pieces of the given player.
+    func deployedPieces(ofPlayer player: SCPlayerColor) -> [SCPieceType] {
+        player == .blue ? self.deployedBluePieces : self.deployedRedPieces
+    }
+
+    /// Returns the undeployed pieces of the given player.
+    ///
+    /// - Parameter player: The color of the player.
+    ///
+    /// - Returns: The array of undeployed pieces of the given player.
+    func undeployedPieces(ofPlayer player: SCPlayerColor) -> [SCPieceType] {
+        player == .blue ? self.undeployedBluePieces : self.undeployedRedPieces
     }
 
     /// Returns the possible moves of the current player.
@@ -178,8 +205,10 @@ class SCGameState: CustomStringConvertible {
 
                 switch self.currentPlayer {
                     case .blue:
+                        self.deployedBluePieces.append(piece.type)
                         self.undeployedBluePieces.removeFirst(of: piece.type)
                     case .red:
+                        self.deployedRedPieces.append(piece.type)
                         self.undeployedRedPieces.removeFirst(of: piece.type)
                 }
             default:
@@ -218,8 +247,10 @@ class SCGameState: CustomStringConvertible {
                     let piece = lastMove.piece!.type
                     switch self.currentPlayer {
                         case .blue:
+                            self.deployedBluePieces.removeFirst(of: piece)
                             self.undeployedBluePieces.append(piece)
                         case .red:
+                            self.deployedRedPieces.removeFirst(of: piece)
                             self.undeployedRedPieces.append(piece)
                     }
                 default:
