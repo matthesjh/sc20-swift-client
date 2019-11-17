@@ -153,6 +153,8 @@ class SCGameState: CustomStringConvertible {
 
     /// Performs the given move on the game board.
     ///
+    /// - Parameter move: The move to be performed.
+    ///
     /// - Returns: `true` if the move could be performed; otherwise, `false`.
     func performMove(move: SCMove) -> Bool {
         // TODO: Validate the move.
