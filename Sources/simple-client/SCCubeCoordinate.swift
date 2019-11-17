@@ -97,4 +97,11 @@ struct SCCubeCoordinate {
     func distance(toCoordinate coordinate: SCCubeCoordinate) -> Int {
         max(abs(self.x - coordinate.x), abs(self.y - coordinate.y), abs(self.z - coordinate.z))
     }
+
+    /// Returns the neighbouring cube coordinates of this cube coordinate.
+    ///
+    /// - Returns: The array of neighbouring cube coordinates.
+    func neighbours() -> [SCCubeCoordinate] {
+        SCDirection.allCases.map { self.coordinate(inDirection: $0) }
+    }
 }

@@ -39,8 +39,8 @@ class SCGameState: CustomStringConvertible {
 
         // Initialize the board with empty fields.
         self.board = (-SCConstants.shift...SCConstants.shift).map { x in
-            let lower = max(-SCConstants.shift, -x - SCConstants.shift)
-            let upper = min(SCConstants.shift, -x + SCConstants.shift)
+            let lower = max(0, -x) - SCConstants.shift
+            let upper = min(0, -x) + SCConstants.shift
 
             return (lower...upper).map { SCField(x: x, y: $0) }
         }
@@ -155,6 +155,60 @@ class SCGameState: CustomStringConvertible {
         self.board.flatMap { $0.filter { $0.isOwned(byPlayer: player) } }
     }
 
+    /// Returns a Boolean value indicating whether the field with the given x-
+    /// and y-coordinate is on the game board.
+    ///
+    /// - Parameters:
+    ///   - x: The x-coordinate of the field.
+    ///   - y: The y-coordinate of the field.
+    ///
+    /// - Returns: `true` if the field with the given x- and y-coordinate is on
+    ///   the game board; otherwise, `false`.
+    func isFieldOnBoard(x: Int, y: Int) -> Bool {
+        abs(x) <= SCConstants.shift && y >= max(0, -x) - SCConstants.shift && y <= min(0, -x) + SCConstants.shift
+    }
+
+    /// Returns a Boolean value indicating whether the field with the given cube
+    /// coordinate is on the game board.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: `true` if the field with the given cube coordinate is on the
+    ///   game board; otherwise, `false`.
+    func isFieldOnBoard(coordinate: SCCubeCoordinate) -> Bool {
+        self.isFieldOnBoard(x: coordinate.x, y: coordinate.y)
+    }
+
+    /// Returns the neighbouring fields of the field with the given x- and
+    /// y-coordinate.
+    ///
+    /// - Parameters:
+    ///   - x: The x-coordinate of the field.
+    ///   - y: The y-coordinate of the field.
+    ///
+    /// - Returns: The array of neighbouring fields. If the given x- or
+    ///   y-coordinate is not on the board, `nil` is returned.
+    func neighboursOfField(x: Int, y: Int) -> [SCField]? {
+        self.neighboursOfField(coordinate: SCCubeCoordinate(x: x, y: y))
+    }
+
+    /// Returns the neighbouring fields of the field with the given cube
+    /// coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The array of neighbouring fields. If the given x- or
+    ///   y-coordinate is not on the board, `nil` is returned.
+    func neighboursOfField(coordinate: SCCubeCoordinate) -> [SCField]? {
+        guard self.isFieldOnBoard(coordinate: coordinate) else {
+            return nil
+        }
+
+        return coordinate.neighbours().compactMap {
+            self.isFieldOnBoard(coordinate: $0) ? self.getField(coordinate: $0) : nil
+        }
+    }
+
     /// Returns the deployed pieces of the given player.
     ///
     /// - Parameter player: The color of the player.
@@ -263,8 +317,8 @@ class SCGameState: CustomStringConvertible {
 
     var description: String {
         (-SCConstants.shift...SCConstants.shift).reduce(into: "") { res, z in
-            let lower = max(-SCConstants.shift, -z - SCConstants.shift)
-            let upper = min(SCConstants.shift, -z + SCConstants.shift)
+            let lower = max(0, -z) - SCConstants.shift
+            let upper = min(0, -z) + SCConstants.shift
 
             res += (lower...upper).map {
                 switch self[$0, -$0 - z] {
