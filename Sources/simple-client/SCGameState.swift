@@ -38,7 +38,7 @@ class SCGameState: CustomStringConvertible {
             let lower = max(-SCConstants.shift, -x - SCConstants.shift)
             let upper = min(SCConstants.shift, -x + SCConstants.shift)
 
-            return (lower...upper).map { SCField(coordinate: SCCubeCoordinate(x: x, y: $0)) }
+            return (lower...upper).map { SCField(x: x, y: $0) }
         }
 
         // Initialize the undeployed pieces of both players.

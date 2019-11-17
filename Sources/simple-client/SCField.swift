@@ -29,6 +29,18 @@ struct SCField {
 
     // MARK: - Initializers
 
+    /// Creates a new field with the given x- and y-coordinate and an empty
+    /// stack of pieces.
+    ///
+    /// - Parameters:
+    ///   - x: The x-coordinate of the field.
+    ///   - y: The y-coordinate of the field.
+    ///   - obstructed: Indicates whether the field is blocked with a
+    ///     blackberry.
+    init(x: Int, y: Int, obstructed: Bool = false) {
+        self.init(coordinate: SCCubeCoordinate(x: x, y: y), obstructed: obstructed)
+    }
+
     /// Creates a new field with the given cube coordinate and an empty stack of
     /// pieces.
     ///
