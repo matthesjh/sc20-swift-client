@@ -1,6 +1,6 @@
 /// A cube coordinate consists of an x-, y- and z-coordinate and points to a
 /// field on the game board.
-struct SCCubeCoordinate {
+struct SCCubeCoordinate: Hashable {
     // MARK: - Properties
 
     /// The x-coordinate of the field.

@@ -155,6 +155,25 @@ class SCGameState: CustomStringConvertible {
         self.board.flatMap { $0.filter { $0.isOwned(byPlayer: player) } }
     }
 
+    /// Returns the fields of the insect swarm.
+    ///
+    /// - Returns: The array of fields of the insect swarm.
+    func swarmFields() -> [SCField] {
+        self.board.flatMap { $0.filter { $0.hasOwner() } }
+    }
+
+    /// Returns the empty fields around the insect swarm.
+    ///
+    /// - Returns: The array of empty fields around the insect swarm.
+    func fieldsAroundSwarm() -> [SCField] {
+        Set(self.swarmFields().flatMap {
+            $0.coordinate.neighbours().filter { self.isFieldOnBoard(coordinate: $0) }
+        }).compactMap {
+            let field = self.getField(coordinate: $0)
+            return field.isEmpty() ? field : nil
+        }
+    }
+
     /// Returns a Boolean value indicating whether the field with the given x-
     /// and y-coordinate is on the game board.
     ///
@@ -192,13 +211,28 @@ class SCGameState: CustomStringConvertible {
         self.neighboursOfField(coordinate: SCCubeCoordinate(x: x, y: y))
     }
 
+    /// Returns the neighbouring fields of the field with the given x- and
+    /// y-coordinate which have the given field state.
+    ///
+    /// - Parameters:
+    ///   - x: The x-coordinate of the field.
+    ///   - y: The y-coordinate of the field.
+    ///   - state: The field state to search for on the board.
+    ///
+    /// - Returns: The array of neighbouring fields with the given field state.
+    ///   If the given x- or y-coordinate is not on the board, `nil` is
+    ///   returned.
+    func neighboursOfField(x: Int, y: Int, withState state: SCFieldState) -> [SCField]? {
+        self.neighboursOfField(coordinate: SCCubeCoordinate(x: x, y: y), withState: state)
+    }
+
     /// Returns the neighbouring fields of the field with the given cube
     /// coordinate.
     ///
     /// - Parameter coordinate: The cube coordinate of the field.
     ///
-    /// - Returns: The array of neighbouring fields. If the given x- or
-    ///   y-coordinate is not on the board, `nil` is returned.
+    /// - Returns: The array of neighbouring fields. If the given cube
+    ///   coordinate is not on the board, `nil` is returned.
     func neighboursOfField(coordinate: SCCubeCoordinate) -> [SCField]? {
         guard self.isFieldOnBoard(coordinate: coordinate) else {
             return nil
@@ -207,6 +241,19 @@ class SCGameState: CustomStringConvertible {
         return coordinate.neighbours().compactMap {
             self.isFieldOnBoard(coordinate: $0) ? self.getField(coordinate: $0) : nil
         }
+    }
+
+    /// Returns the neighbouring fields of the field with the given cube
+    /// coordinate which have the given field state.
+    ///
+    /// - Parameters:
+    ///   - coordinate: The cube coordinate of the field.
+    ///   - state: The field state to search for on the board.
+    ///
+    /// - Returns: The array of neighbouring fields with the given field state.
+    ///   If the given cube coordinate is not on the board, `nil` is returned.
+    func neighboursOfField(coordinate: SCCubeCoordinate, withState state: SCFieldState) -> [SCField]? {
+        self.neighboursOfField(coordinate: coordinate)?.filter { $0.state == state }
     }
 
     /// Returns the deployed pieces of the given player.
