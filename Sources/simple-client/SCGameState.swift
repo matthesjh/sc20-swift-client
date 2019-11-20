@@ -274,6 +274,31 @@ class SCGameState: CustomStringConvertible {
         player == .blue ? self.undeployedBluePieces : self.undeployedRedPieces
     }
 
+    /// Returns the field of the bee of the given player.
+    ///
+    /// - Parameter player: The color of the player.
+    ///
+    /// - Returns: The field of the bee. If the player has not set the bee yet,
+    ///   `nil` is returned.
+    func fieldOfBee(ofPlayer player: SCPlayerColor) -> SCField? {
+        self.board.joined().first { $0.pieces.contains { $0.type == .bee && $0.owner == player } }
+    }
+
+    /// Returns a Boolean value indicating whether the bee of the given player
+    /// is blocked.
+    ///
+    /// - Parameter player: The color of the player.
+    ///
+    /// - Returns: `true` if the bee of the given player is blocked; otherwise,
+    ///   `false`.
+    func isBeeBlocked(ofPlayer player: SCPlayerColor) -> Bool {
+        guard let coordinate = self.fieldOfBee(ofPlayer: player)?.coordinate else {
+            return false
+        }
+
+        return self.neighboursOfField(coordinate: coordinate, withState: .empty)!.isEmpty
+    }
+
     /// Returns the possible moves of the current player.
     ///
     /// - Returns: The array of possible moves.
