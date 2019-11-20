@@ -25,7 +25,7 @@ class SCGameState: CustomStringConvertible {
 
     /// The current round number.
     var round: Int {
-        self.turn / 2 + 1
+        self.turn / 2
     }
 
     // MARK: - Initializers
