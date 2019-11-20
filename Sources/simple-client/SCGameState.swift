@@ -299,10 +299,54 @@ class SCGameState: CustomStringConvertible {
         return self.neighboursOfField(coordinate: coordinate, withState: .empty)!.isEmpty
     }
 
+    /// Returns the possible drag moves of the current player.
+    ///
+    /// - Returns: The array of possible drag moves.
+    func possibleDragMoves() -> [SCMove] { [] }
+
+    /// Returns the possible set moves of the current player.
+    ///
+    /// - Returns: The array of possible set moves.
+    func possibleSetMoves() -> [SCMove] {
+        let opponentPlayer = self.currentPlayer.opponentColor
+        var coordinates = [SCCubeCoordinate]()
+
+        if self.deployedPieces(ofPlayer: self.currentPlayer).isEmpty {
+            if self.turn == 0 {
+                coordinates = self.board.joined().compactMap { $0.isEmpty() ? $0.coordinate : nil }
+            } else {
+                coordinates = self.fieldsAroundSwarm().map { $0.coordinate }
+            }
+        } else {
+            coordinates = Set(self.getFields(ofPlayer: self.currentPlayer).flatMap {
+                self.neighboursOfField(coordinate: $0.coordinate, withState: .empty)!.map { $0.coordinate }
+            }).filter {
+                self.neighboursOfField(coordinate: $0)!.allSatisfy {
+                    guard let owner = $0.owner else {
+                        return true
+                    }
+
+                    return owner != opponentPlayer
+                }
+            }
+        }
+
+        let undeployedPieces = Set(self.undeployedPieces(ofPlayer: self.currentPlayer))
+        let pieces = undeployedPieces.contains(.bee) && self.round > 2 ? [.bee] : undeployedPieces
+
+        return coordinates.flatMap { coordinate in
+            pieces.map { SCMove(piece: SCPiece(owner: self.currentPlayer, type: $0), destination: coordinate) }
+        }
+    }
+
     /// Returns the possible moves of the current player.
     ///
     /// - Returns: The array of possible moves.
-    func possibleMoves() -> [SCMove] { [] }
+    func possibleMoves() -> [SCMove] {
+        let moves = self.possibleSetMoves() + self.possibleDragMoves()
+
+        return moves.isEmpty ? [SCMove()] : moves
+    }
 
     /// Performs the given move on the game board.
     ///
