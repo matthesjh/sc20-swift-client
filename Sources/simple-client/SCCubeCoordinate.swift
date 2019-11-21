@@ -98,10 +98,33 @@ struct SCCubeCoordinate: Hashable {
         max(abs(self.x - coordinate.x), abs(self.y - coordinate.y), abs(self.z - coordinate.z))
     }
 
+    /// Returns a Boolean value indicating whether the given cube coordinate and
+    /// this cube coordinate can be connected with a straight line via one of
+    /// the possible directions.
+    ///
+    /// - Parameter coordinate: The cube coordinate to check.
+    ///
+    /// - Returns: `true` if the cube coordinates can be connected with a
+    ///   straight line via one of the possible directions; otherwise, `false`.
+    func isOnLine(withCoordinate coordinate: SCCubeCoordinate) -> Bool {
+        self.x == coordinate.x || self.y == coordinate.y || self.z == coordinate.z
+    }
+
     /// Returns the neighbouring cube coordinates of this cube coordinate.
     ///
     /// - Returns: The array of neighbouring cube coordinates.
     func neighbours() -> [SCCubeCoordinate] {
         SCDirection.allCases.map { self.coordinate(inDirection: $0) }
+    }
+
+    /// Returns a Boolean value indicating whether this cube coordinate is a
+    /// neighbour of the given cube coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate to check.
+    ///
+    /// - Returns: `true` if this cube coordinate is a neighbour of the given
+    ///   cube coordinate; otherwise, `false`.
+    func isNeighbour(ofCoordinate coordinate: SCCubeCoordinate) -> Bool {
+        self.distance(toCoordinate: coordinate) == 1
     }
 }

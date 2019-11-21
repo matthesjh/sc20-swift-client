@@ -100,4 +100,50 @@ struct SCField {
     func distance(toField field: SCField) -> Int {
         self.coordinate.distance(toCoordinate: field.coordinate)
     }
+
+    /// Returns a Boolean value indicating whether the given cube coordinate and
+    /// the cube coordinate of this field can be connected with a straight line
+    /// via one of the possible directions.
+    ///
+    /// - Parameter coordinate: The cube coordinate to check.
+    ///
+    /// - Returns: `true` if the cube coordinates can be connected with a
+    ///   straight line via one of the possible directions; otherwise, `false`.
+    func isOnLine(withCoordinate coordinate: SCCubeCoordinate) -> Bool {
+        self.coordinate.isOnLine(withCoordinate: coordinate)
+    }
+
+    /// Returns a Boolean value indicating whether the given field and this
+    /// field can be connected with a straight line via one of the possible
+    /// directions.
+    ///
+    /// - Parameter field: The field to check.
+    ///
+    /// - Returns: `true` if the fields can be connected with a straight line
+    ///   via one of the possible directions; otherwise, `false`.
+    func isOnLine(withField field: SCField) -> Bool {
+        self.coordinate.isOnLine(withCoordinate: field.coordinate)
+    }
+
+    /// Returns a Boolean value indicating whether this field is a neighbour of
+    /// the given cube coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate to check.
+    ///
+    /// - Returns: `true` if this field is a neighbour of the given cube
+    ///   coordinate; otherwise, `false`.
+    func isNeighbour(ofCoordinate coordinate: SCCubeCoordinate) -> Bool {
+        self.coordinate.isNeighbour(ofCoordinate: coordinate)
+    }
+
+    /// Returns a Boolean value indicating whether this field is a neighbour of
+    /// the given field.
+    ///
+    /// - Parameter field: The field to check.
+    ///
+    /// - Returns: `true` if this field is a neighbour of the given field;
+    ///   otherwise, `false`.
+    func isNeighbour(ofField field: SCField) -> Bool {
+        self.coordinate.isNeighbour(ofCoordinate: field.coordinate)
+    }
 }
