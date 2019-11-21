@@ -1,4 +1,4 @@
-name: Build the package
+name: Build package
 
 on:
   push:
