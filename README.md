@@ -4,8 +4,6 @@
 [![Swift](https://img.shields.io/badge/swift-%3E%3D%205.1-brightgreen.svg?logo=swift)](https://swift.org/)
 ![Supported Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20linux-lightgrey.svg)
 
-:warning: The package is currently in an early stage of development and therefore not intended for use. :warning:
-
 This package contains a simple client written in [Swift](https://swift.org/) for [Software-Challenge Germany](https://www.software-challenge.de/) 2019/2020.
 
 The game of the contest year 2019/2020 is called *Hive*. It is played on a hexagon board consisting of hexagon fields. The goal of the game is to trap the opponent queen bee from all six sides with insect tiles, blocked fields or the edges of the board. The complete documentation of the game rules and the XML communication with the game server can be found [here](https://cau-kiel-tech-inf.github.io/socha-enduser-docs/).
