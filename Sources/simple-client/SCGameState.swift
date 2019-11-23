@@ -362,11 +362,11 @@ class SCGameState: CustomStringConvertible {
             case .dragMove:
                 let start = move.start!
                 let startX = start.x + SCConstants.shift
-                _ = self.board[startX][start.y + min(SCConstants.shift, startX)].pieces.popLast()
+                let piece = self.board[startX][start.y + min(SCConstants.shift, startX)].pieces.popLast()!
 
                 let dest = move.destination!
                 let destX = dest.x + SCConstants.shift
-                self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.append(move.piece!)
+                self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.append(piece)
             case .setMove:
                 let dest = move.destination!
                 let destX = dest.x + SCConstants.shift
