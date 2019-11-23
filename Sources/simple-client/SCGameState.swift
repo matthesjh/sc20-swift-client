@@ -152,14 +152,14 @@ class SCGameState: CustomStringConvertible {
     ///
     /// - Returns: The array of fields owned by the given player.
     func getFields(ofPlayer player: SCPlayerColor) -> [SCField] {
-        self.board.flatMap { $0.filter { $0.isOwned(byPlayer: player) } }
+        self.board.joined().filter { $0.isOwned(byPlayer: player) }
     }
 
     /// Returns the fields of the insect swarm.
     ///
     /// - Returns: The array of fields of the insect swarm.
     func swarmFields() -> [SCField] {
-        self.board.flatMap { $0.filter { $0.hasOwner() } }
+        self.board.joined().filter { $0.hasOwner() }
     }
 
     /// Returns the empty fields around the insect swarm.
@@ -311,11 +311,11 @@ class SCGameState: CustomStringConvertible {
         let opponentPlayer = self.currentPlayer.opponentColor
         var coordinates = [SCCubeCoordinate]()
 
-        if self.deployedPieces(ofPlayer: self.currentPlayer).isEmpty {
-            if self.turn == 0 {
-                coordinates = self.board.joined().compactMap { $0.isEmpty() ? $0.coordinate : nil }
-            } else {
-                coordinates = self.fieldsAroundSwarm().map { $0.coordinate }
+        if turn == 0 {
+            coordinates = self.board.joined().compactMap { $0.isEmpty() ? $0.coordinate : nil }
+        } else if turn == 1 {
+            coordinates = self.lastMove!.destination!.neighbours().filter {
+                self.isFieldOnBoard(coordinate: $0) && self[$0] == .empty
             }
         } else {
             coordinates = Set(self.getFields(ofPlayer: self.currentPlayer).flatMap {
@@ -362,7 +362,7 @@ class SCGameState: CustomStringConvertible {
             case .dragMove:
                 let start = move.start!
                 let startX = start.x + SCConstants.shift
-                let piece = self.board[startX][start.y + min(SCConstants.shift, startX)].pieces.popLast()!
+                let piece = self.board[startX][start.y + min(SCConstants.shift, startX)].pieces.removeLast()
 
                 let dest = move.destination!
                 let destX = dest.x + SCConstants.shift
@@ -402,19 +402,18 @@ class SCGameState: CustomStringConvertible {
 
             switch lastMove.type {
                 case .dragMove:
-                    let start = lastMove.start!
-                    let startX = start.x + SCConstants.shift
-                    self.board[startX][start.y + min(SCConstants.shift, startX)].pieces.append(lastMove.piece!)
-
                     let dest = lastMove.destination!
                     let destX = dest.x + SCConstants.shift
-                    _ = self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.popLast()
+                    let piece = self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.removeLast()
+
+                    let start = lastMove.start!
+                    let startX = start.x + SCConstants.shift
+                    self.board[startX][start.y + min(SCConstants.shift, startX)].pieces.append(piece)
                 case .setMove:
                     let dest = lastMove.destination!
                     let destX = dest.x + SCConstants.shift
-                    _ = self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.popLast()
+                    let piece = self.board[destX][dest.y + min(SCConstants.shift, destX)].pieces.removeLast().type
 
-                    let piece = lastMove.piece!.type
                     switch self.currentPlayer {
                         case .blue:
                             self.deployedBluePieces.removeFirst(of: piece)
