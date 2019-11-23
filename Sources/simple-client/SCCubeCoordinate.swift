@@ -74,17 +74,17 @@ struct SCCubeCoordinate: Hashable {
     func coordinate(inDirection direction: SCDirection, withDistance distance: Int = 1) -> SCCubeCoordinate {
         switch direction {
             case .upRight:
-                return SCCubeCoordinate(x: self.x + distance, y: self.y - distance)
-            case .right:
                 return SCCubeCoordinate(x: self.x + distance, z: self.z - distance)
+            case .right:
+                return SCCubeCoordinate(x: self.x + distance, y: self.y - distance)
             case .downRight:
-                return SCCubeCoordinate(y: self.y + distance, z: self.z - distance)
-            case .downLeft:
-                return SCCubeCoordinate(x: self.x - distance, y: self.y + distance)
-            case .left:
-                return SCCubeCoordinate(x: self.x - distance, z: self.z + distance)
-            case .upLeft:
                 return SCCubeCoordinate(y: self.y - distance, z: self.z + distance)
+            case .downLeft:
+                return SCCubeCoordinate(x: self.x - distance, z: self.z + distance)
+            case .left:
+                return SCCubeCoordinate(x: self.x - distance, y: self.y + distance)
+            case .upLeft:
+                return SCCubeCoordinate(y: self.y + distance, z: self.z - distance)
         }
     }
 
