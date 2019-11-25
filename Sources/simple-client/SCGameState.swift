@@ -37,7 +37,7 @@ class SCGameState: CustomStringConvertible {
         self.startPlayer = startPlayer
         self.currentPlayer = startPlayer
 
-        // Initialize the board with empty fields.
+        // Initialize the game board with empty fields.
         self.board = (-SCConstants.shift...SCConstants.shift).map { x in
             let lower = max(0, -x) - SCConstants.shift
             let upper = min(0, -x) + SCConstants.shift
@@ -148,7 +148,8 @@ class SCGameState: CustomStringConvertible {
 
     /// Returns the fields owned by the given player.
     ///
-    /// - Parameter player: The color of the player to search for on the board.
+    /// - Parameter player: The color of the player to search for on the game
+    ///   board.
     ///
     /// - Returns: The array of fields owned by the given player.
     func getFields(ofPlayer player: SCPlayerColor) -> [SCField] {
@@ -206,7 +207,7 @@ class SCGameState: CustomStringConvertible {
     ///   - y: The y-coordinate of the field.
     ///
     /// - Returns: The array of neighbouring fields. If the given x- or
-    ///   y-coordinate is not on the board, `nil` is returned.
+    ///   y-coordinate is not on the game board, `nil` is returned.
     func neighboursOfField(x: Int, y: Int) -> [SCField]? {
         self.neighboursOfField(coordinate: SCCubeCoordinate(x: x, y: y))
     }
@@ -217,10 +218,10 @@ class SCGameState: CustomStringConvertible {
     /// - Parameters:
     ///   - x: The x-coordinate of the field.
     ///   - y: The y-coordinate of the field.
-    ///   - state: The field state to search for on the board.
+    ///   - state: The field state to search for on the game board.
     ///
     /// - Returns: The array of neighbouring fields with the given field state.
-    ///   If the given x- or y-coordinate is not on the board, `nil` is
+    ///   If the given x- or y-coordinate is not on the game board, `nil` is
     ///   returned.
     func neighboursOfField(x: Int, y: Int, withState state: SCFieldState) -> [SCField]? {
         self.neighboursOfField(coordinate: SCCubeCoordinate(x: x, y: y), withState: state)
@@ -232,7 +233,7 @@ class SCGameState: CustomStringConvertible {
     /// - Parameter coordinate: The cube coordinate of the field.
     ///
     /// - Returns: The array of neighbouring fields. If the given cube
-    ///   coordinate is not on the board, `nil` is returned.
+    ///   coordinate is not on the game board, `nil` is returned.
     func neighboursOfField(coordinate: SCCubeCoordinate) -> [SCField]? {
         guard self.isFieldOnBoard(coordinate: coordinate) else {
             return nil
@@ -248,12 +249,41 @@ class SCGameState: CustomStringConvertible {
     ///
     /// - Parameters:
     ///   - coordinate: The cube coordinate of the field.
-    ///   - state: The field state to search for on the board.
+    ///   - state: The field state to search for on the game board.
     ///
     /// - Returns: The array of neighbouring fields with the given field state.
-    ///   If the given cube coordinate is not on the board, `nil` is returned.
+    ///   If the given cube coordinate is not on the game board, `nil` is
+    ///   returned.
     func neighboursOfField(coordinate: SCCubeCoordinate, withState state: SCFieldState) -> [SCField]? {
         self.neighboursOfField(coordinate: coordinate)?.filter { $0.state == state }
+    }
+
+    /// Returns the next empty field in the given direction starting at the
+    /// given field with the given minimum distance.
+    ///
+    /// - Parameters:
+    ///   - direction: The direction to use.
+    ///   - coordinate: The cube coordinate of the start field.
+    ///   - distance: The minimum distance from the field.
+    ///
+    /// - Returns: The next empty field on the game board. If no empty field is
+    ///   found on the game board, `nil` is returned.
+    func emptyField(inDirection direction: SCDirection, fromCoordinate coordinate: SCCubeCoordinate, withMinimumDistance distance: Int = 1) -> SCField? {
+        var coord = coordinate.coordinate(inDirection: direction, withDistance: distance)
+
+        guard self.isFieldOnBoard(coordinate: coord) else {
+            return nil
+        }
+
+        while self[coord] != .empty {
+            coord = coord.coordinate(inDirection: direction)
+
+            guard self.isFieldOnBoard(coordinate: coord) else {
+                return nil
+            }
+        }
+
+        return self.getField(coordinate: coord)
     }
 
     /// Returns the deployed pieces of the given player.

@@ -293,7 +293,7 @@ class SCGameHandler: NSObject, XMLParserDelegate {
                 }
             case "field":
                 if !self.gameStateCreated {
-                    // Update the field on the board.
+                    // Update the field on the game board.
                     self.gameState.setField(field: self.field)
                 }
             case "lastMove":
