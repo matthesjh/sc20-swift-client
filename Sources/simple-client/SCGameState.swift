@@ -267,21 +267,20 @@ class SCGameState: CustomStringConvertible {
     ///   - distance: The minimum distance from the field.
     ///
     /// - Returns: The next empty field on the game board. If no empty field is
-    ///   found on the game board, `nil` is returned.
+    ///   found on the game board or an obstructed one is discovered, `nil` is
+    ///   returned.
     func emptyField(inDirection direction: SCDirection, fromCoordinate coordinate: SCCubeCoordinate, withMinimumDistance distance: Int = 1) -> SCField? {
-        var coord = coordinate.coordinate(inDirection: direction, withDistance: distance)
+        var coord = coordinate
+        var d = 0
 
-        guard self.isFieldOnBoard(coordinate: coord) else {
-            return nil
-        }
-
-        while self[coord] != .empty {
+        repeat {
             coord = coord.coordinate(inDirection: direction)
+            d += 1
 
-            guard self.isFieldOnBoard(coordinate: coord) else {
+            guard self.isFieldOnBoard(coordinate: coord) && self[coord] != .obstructed else {
                 return nil
             }
-        }
+        } while self[coord] != .empty || d < distance
 
         return self.getField(coordinate: coord)
     }
