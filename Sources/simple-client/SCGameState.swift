@@ -267,9 +267,13 @@ class SCGameState: CustomStringConvertible {
     ///   - distance: The minimum distance from the field.
     ///
     /// - Returns: The next empty field on the game board. If no empty field is
-    ///   found on the game board or an obstructed one is discovered, `nil` is
-    ///   returned.
+    ///   found on the game board, an obstructed one is discovered or the given
+    ///   minimum distance is less than one, `nil` is returned.
     func emptyField(inDirection direction: SCDirection, fromCoordinate coordinate: SCCubeCoordinate, withMinimumDistance distance: Int = 1) -> SCField? {
+        guard distance > 0 else {
+            return nil
+        }
+
         var coord = coordinate
         var d = 0
 

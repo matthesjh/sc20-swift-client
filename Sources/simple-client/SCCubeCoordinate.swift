@@ -98,6 +98,27 @@ struct SCCubeCoordinate: Hashable {
         max(abs(self.x - coordinate.x), abs(self.y - coordinate.y), abs(self.z - coordinate.z))
     }
 
+    /// Returns the direction from this cube coordinate to the given cube
+    /// coordinate.
+    ///
+    /// The distance of the two cube coordinates must be at least one.
+    ///
+    /// - Parameter coordinate: The cube coordinate to check.
+    ///
+    /// - Returns: The direction in which the given cube coordinate can be
+    ///   reached directly; otherwise, `nil`.
+    func direction(toCoordinate coordinate: SCCubeCoordinate) -> SCDirection? {
+        if self.x == coordinate.x {
+            return self.y < coordinate.y ? .upLeft : .downRight
+        } else if self.y == coordinate.y {
+            return self.x < coordinate.x ? .upRight : .downLeft
+        } else if self.z == coordinate.z {
+            return self.x < coordinate.x ? .right : .left
+        }
+
+        return nil
+    }
+
     /// Returns a Boolean value indicating whether the given cube coordinate and
     /// this cube coordinate can be connected with a straight line via one of
     /// the possible directions.

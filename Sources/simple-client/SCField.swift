@@ -101,6 +101,30 @@ struct SCField {
         self.coordinate.distance(toCoordinate: field.coordinate)
     }
 
+    /// Returns the direction from this field to the given cube coordinate.
+    ///
+    /// The distance of the field and the cube coordinate must be at least one.
+    ///
+    /// - Parameter coordinate: The cube coordinate to check.
+    ///
+    /// - Returns: The direction in which the given cube coordinate can be
+    ///   reached directly; otherwise, `nil`.
+    func direction(toCoordinate coordinate: SCCubeCoordinate) -> SCDirection? {
+        self.coordinate.direction(toCoordinate: coordinate)
+    }
+
+    /// Returns the direction from this field to the given field.
+    ///
+    /// The distance of the two fields must be at least one.
+    ///
+    /// - Parameter field: The field to check.
+    ///
+    /// - Returns: The direction in which the given field can be reached
+    ///   directly; otherwise, `nil`.
+    func direction(toField field: SCField) -> SCDirection? {
+        self.coordinate.direction(toCoordinate: field.coordinate)
+    }
+
     /// Returns a Boolean value indicating whether the given cube coordinate and
     /// the cube coordinate of this field can be connected with a straight line
     /// via one of the possible directions.
