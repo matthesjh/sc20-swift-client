@@ -138,6 +138,19 @@ struct SCCubeCoordinate: Hashable {
         SCDirection.allCases.map { self.coordinate(inDirection: $0) }
     }
 
+    /// Returns the neighbouring cube coordinates of this cube coordinate shared
+    /// with the given cube coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate to check.
+    ///
+    /// - Returns: The array of neighbouring cube coordinates shared with the
+    ///   given cube coordinate.
+    func neighbours(withCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
+        let neighbours = coordinate.neighbours()
+
+        return self.neighbours().filter { neighbours.contains($0) }
+    }
+
     /// Returns a Boolean value indicating whether this cube coordinate is a
     /// neighbour of the given cube coordinate.
     ///
