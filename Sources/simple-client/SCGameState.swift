@@ -258,6 +258,34 @@ class SCGameState: CustomStringConvertible {
         self.neighboursOfField(coordinate: coordinate)?.filter { $0.state == state }
     }
 
+    /// Returns the accessible neighbours of the field with the given cube
+    /// coordinate.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The array of accessible neighbours.
+    func accessibleNeighbours(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
+        coordinate.neighbours().filter {
+            self.isFieldOnBoard(coordinate: $0)
+                && self[$0] == .empty
+                && self.canMove(fromCoordinate: coordinate, toCoordinate: $0)
+        }
+    }
+
+    /// Returns a Boolean value indicating whether a piece can be moved from the
+    /// given start field to the given destination field.
+    ///
+    /// - Parameters:
+    ///   - start: The cube coordinate of the start field.
+    ///   - destination: The cube coordinate of the destination field.
+    ///
+    /// - Returns: `true`, if the piece can be moved; otherwise, `false`.
+    private func canMove(fromCoordinate start: SCCubeCoordinate, toCoordinate destination: SCCubeCoordinate) -> Bool {
+        start.neighbours(withCoordinate: destination).count {
+            self.isFieldOnBoard(coordinate: $0) && self[$0] != .empty
+        } < 2
+    }
+
     /// Returns the next empty field in the given direction starting at the
     /// given field with the given minimum distance.
     ///
@@ -335,7 +363,142 @@ class SCGameState: CustomStringConvertible {
     /// Returns the possible drag moves of the current player.
     ///
     /// - Returns: The array of possible drag moves.
-    func possibleDragMoves() -> [SCMove] { [] }
+    func possibleDragMoves() -> [SCMove] {
+        guard self.deployedPieces(ofPlayer: self.currentPlayer).contains(.bee) else {
+            return []
+        }
+
+        return self.getFields(ofPlayer: self.currentPlayer).flatMap { field -> [SCMove] in
+            var targets = [SCCubeCoordinate]()
+
+            switch field.pieces.last!.type {
+                case .ant:
+                    targets = self.antMoves(fromCoordinate: field.coordinate)
+                case .bee:
+                    targets = self.beeMoves(fromCoordinate: field.coordinate)
+                case .beetle:
+                    targets = self.beetleMoves(fromCoordinate: field.coordinate)
+                case .grasshopper:
+                    targets = self.grasshopperMoves(fromCoordinate: field.coordinate)
+                case .spider:
+                    targets = self.spiderMoves(fromCoordinate: field.coordinate)
+            }
+
+            return targets.compactMap {
+                let move = SCMove(start: field.coordinate, destination: $0)
+
+                return self.isSwarmConnected(afterMove: move) ? move : nil
+            }
+        }
+    }
+
+    /// Returns the possible move destinations for an ant at the given field.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The array of possible move destinations.
+    private func antMoves(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] { [] }
+
+    /// Returns the possible move destinations for a bee at the given field.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The array of possible move destinations.
+    private func beeMoves(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
+        self.accessibleNeighbours(fromCoordinate: coordinate)
+    }
+
+    /// Returns the possible move destinations for a bettle at the given field.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The array of possible move destinations.
+    private func beetleMoves(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
+        coordinate.neighbours().filter {
+            guard self.isFieldOnBoard(coordinate: $0) else {
+                return false
+            }
+
+            let field = self.getField(coordinate: $0)
+            return field.hasOwner() || (field.isEmpty() && self.canMove(fromCoordinate: coordinate, toCoordinate: $0))
+        }
+    }
+
+    /// Returns the possible move destinations for a grasshopper at the given
+    /// field.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The array of possible move destinations.
+    private func grasshopperMoves(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
+        coordinate.neighbours().filter {
+            self.isFieldOnBoard(coordinate: $0) && self.getField(coordinate: $0).hasOwner()
+        }.compactMap {
+            self.emptyField(inDirection: coordinate.direction(toCoordinate: $0)!, fromCoordinate: coordinate)?.coordinate
+        }
+    }
+
+    /// Returns the possible move destinations for a spider at the given field.
+    ///
+    /// - Parameter coordinate: The cube coordinate of the field.
+    ///
+    /// - Returns: The array of possible move destinations.
+    private func spiderMoves(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
+        var coords = Set(self.accessibleNeighbours(fromCoordinate: coordinate).flatMap {
+            self.accessibleNeighbours(fromCoordinate: $0).flatMap {
+                self.accessibleNeighbours(fromCoordinate: $0)
+            }
+        })
+        coords.remove(coordinate)
+
+        return Array(coords)
+    }
+
+    /// Returns a Boolean value indicating whether the pieces on the game board
+    /// are connected to a single swarm when performing the given move.
+    ///
+    /// - Parameter move: The move to be performed.
+    ///
+    /// - Returns: `true` if the pieces on the game board are connected to a
+    ///   single swarm; otherwise, `false`.
+    private func isSwarmConnected(afterMove move: SCMove) -> Bool {
+        let start = move.start!
+        let startX = start.x + SCConstants.shift
+        let startY = start.y + min(SCConstants.shift, startX)
+        let piece = self.board[startX][startY].pieces.removeLast()
+
+        let dest = move.destination!
+        let destX = dest.x + SCConstants.shift
+        let destY = dest.y + min(SCConstants.shift, destX)
+        self.board[destX][destY].pieces.append(piece)
+
+        defer {
+            _ = self.board[destX][destY].pieces.removeLast()
+            self.board[startX][startY].pieces.append(piece)
+        }
+
+        var visited = Set<SCCubeCoordinate>()
+
+        func dfs(coord: SCCubeCoordinate) {
+            visited.insert(coord)
+
+            coord.neighbours().filter {
+                self.isFieldOnBoard(coordinate: $0) && self.getField(coordinate: $0).hasOwner() && !visited.contains($0)
+            }.forEach {
+                dfs(coord: $0)
+            }
+        }
+
+        for field in self.board.joined().filter({ $0.hasOwner() }) {
+            if visited.isEmpty {
+                dfs(coord: field.coordinate)
+            } else if !visited.contains(field.coordinate) {
+                return false
+            }
+        }
+
+        return true
+    }
 
     /// Returns the possible set moves of the current player.
     ///
