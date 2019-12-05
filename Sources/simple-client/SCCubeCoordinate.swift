@@ -148,7 +148,7 @@ struct SCCubeCoordinate: Hashable {
     func neighbours(withCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
         let neighbours = coordinate.neighbours()
 
-        return self.neighbours().filter { neighbours.contains($0) }
+        return self.neighbours().filter(neighbours.contains)
     }
 
     /// Returns a Boolean value indicating whether this cube coordinate is a
