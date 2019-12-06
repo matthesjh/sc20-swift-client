@@ -163,16 +163,35 @@ class SCGameState: CustomStringConvertible {
         self.board.joined().filter { $0.hasOwner() }
     }
 
+    /// Returns the cube coordinates of the fields of the insect swarm.
+    ///
+    /// - Returns: The array of cube coordinates of the fields of the insect
+    ///   swarm.
+    func swarmCoordinates() -> [SCCubeCoordinate] {
+        self.board.joined().compactMap { $0.hasOwner() ? $0.coordinate : nil }
+    }
+
     /// Returns the empty fields around the insect swarm.
     ///
     /// - Returns: The array of empty fields around the insect swarm.
     func fieldsAroundSwarm() -> [SCField] {
-        Set(self.swarmFields().flatMap {
-            $0.coordinate.neighbours().filter { self.isFieldOnBoard(coordinate: $0) }
+        Set(self.swarmCoordinates().flatMap {
+            $0.neighbours().filter(self.isFieldOnBoard)
         }).compactMap {
             let field = self.getField(coordinate: $0)
             return field.isEmpty() ? field : nil
         }
+    }
+
+    /// Returns the cube coordinates of the empty fields around the insect
+    /// swarm.
+    ///
+    /// - Returns: The array of cube coordinates of the empty fields around the
+    ///   insect swarm.
+    func coordinatesAroundSwarm() -> [SCCubeCoordinate] {
+        Set(self.swarmCoordinates().flatMap {
+            $0.neighbours().filter(self.isFieldOnBoard)
+        }).filter { self[$0] == .empty }
     }
 
     /// Returns a Boolean value indicating whether the field with the given x-
@@ -281,9 +300,9 @@ class SCGameState: CustomStringConvertible {
     ///
     /// - Returns: `true`, if the piece can be moved; otherwise, `false`.
     private func canMove(fromCoordinate start: SCCubeCoordinate, toCoordinate destination: SCCubeCoordinate) -> Bool {
-        start.neighbours(withCoordinate: destination).count {
-            self.isFieldOnBoard(coordinate: $0) && self[$0] != .empty
-        } < 2
+        let neighbours = start.neighbours(withCoordinate: destination).filter(self.isFieldOnBoard)
+
+        return neighbours.count { self[$0] != .empty } < 2 && neighbours.count { self.getField(coordinate: $0).hasOwner() } > 0
     }
 
     /// Returns the next empty field in the given direction starting at the
@@ -443,16 +462,7 @@ class SCGameState: CustomStringConvertible {
     /// - Parameter coordinate: The cube coordinate of the field.
     ///
     /// - Returns: The array of possible move destinations.
-    private func spiderMoves(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] {
-        var coords = Set(self.accessibleNeighbours(fromCoordinate: coordinate).flatMap {
-            self.accessibleNeighbours(fromCoordinate: $0).flatMap {
-                self.accessibleNeighbours(fromCoordinate: $0)
-            }
-        })
-        coords.remove(coordinate)
-
-        return Array(coords)
-    }
+    private func spiderMoves(fromCoordinate coordinate: SCCubeCoordinate) -> [SCCubeCoordinate] { [] }
 
     /// Returns a Boolean value indicating whether the pieces on the game board
     /// are connected to a single swarm when performing the given move.
@@ -467,13 +477,7 @@ class SCGameState: CustomStringConvertible {
         let startY = start.y + min(SCConstants.shift, startX)
         let piece = self.board[startX][startY].pieces.removeLast()
 
-        let dest = move.destination!
-        let destX = dest.x + SCConstants.shift
-        let destY = dest.y + min(SCConstants.shift, destX)
-        self.board[destX][destY].pieces.append(piece)
-
         defer {
-            _ = self.board[destX][destY].pieces.removeLast()
             self.board[startX][startY].pieces.append(piece)
         }
 
@@ -515,7 +519,9 @@ class SCGameState: CustomStringConvertible {
             }
         } else {
             coordinates = Set(self.getFields(ofPlayer: self.currentPlayer).flatMap {
-                self.neighboursOfField(coordinate: $0.coordinate, withState: .empty)!.map { $0.coordinate }
+                $0.coordinate.neighbours().filter {
+                    self.isFieldOnBoard(coordinate: $0) && self[$0] == .empty
+                }
             }).filter {
                 self.neighboursOfField(coordinate: $0)!.allSatisfy {
                     guard let owner = $0.owner else {
@@ -546,12 +552,13 @@ class SCGameState: CustomStringConvertible {
 
     /// Performs the given move on the game board.
     ///
+    /// Due to performance reasons the given move is not validated prior to
+    /// performing it on the game board.
+    ///
     /// - Parameter move: The move to be performed.
     ///
     /// - Returns: `true` if the move could be performed; otherwise, `false`.
     func performMove(move: SCMove) -> Bool {
-        // TODO: Validate the move.
-
         self.undoStack.append(self.lastMove)
 
         switch move.type {
