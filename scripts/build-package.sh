@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ "${TRAVIS_OS_NAME}" = "linux" ] || [ "${RUNNER_OS}" = "Linux" ]; then
-  SWIFT_VERSION_NUMBER=5.1.2
+  SWIFT_VERSION_NUMBER=5.1.3
   SWIFT_PLATFORM=ubuntu$(lsb_release -r -s)
   SWIFT_BRANCH=swift-${SWIFT_VERSION_NUMBER}-release
   SWIFT_VERSION=swift-${SWIFT_VERSION_NUMBER}-RELEASE
