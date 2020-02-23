@@ -156,6 +156,22 @@ class SCGameState: CustomStringConvertible {
         self.board.joined().filter { $0.isOwned(byPlayer: player) }
     }
 
+    /// Returns the fields with the given field state.
+    ///
+    /// - Parameter state: The field state to search for on the game board.
+    ///
+    /// - Returns: The array of fields with the given field state.
+    func getFields(withState state: SCFieldState) -> [SCField] {
+        self.board.joined().filter { $0.state == state }
+    }
+
+    /// Returns the fields that are obstructed with a blackberry.
+    ///
+    /// - Returns: The array of fields that are obstructed with a blackberry.
+    func obstructedFields() -> [SCField] {
+        self.board.joined().filter { $0.obstructed }
+    }
+
     /// Returns the fields of the insect swarm.
     ///
     /// - Returns: The array of fields of the insect swarm.
